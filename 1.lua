@@ -1,21 +1,16 @@
+--[[
+    My Restaurant! Ultimate Script
+    Custom GUI - No Library Required
+    Author: ZmZ
+]]
+
 if not game:IsLoaded() then game.Loaded:Wait() end
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 local Player = Players.LocalPlayer
-
--- Tải Orion
-local Orion = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-assert(Orion, "Không thể tải Orion!")
-
--- Tạo Window
-local Window = Orion:MakeWindow({
-    Name = "My Restaurant! | Ultimate Script",
-    HidePremium = false,
-    SaveConfig = true,
-    ConfigFolder = "MyRestaurant",
-    IntroEnabled = false
-})
 
 -- Lấy Library game
 local Library = require(game:GetService("ReplicatedStorage"):WaitForChild("Framework"):WaitForChild("Library"))
@@ -46,8 +41,6 @@ local Network = GetPath("Network")
 
 -- Variables
 local StartTick = tick()
-local StoreTeleports = {}
-local PlayerTeleports = {}
 local Wells = {"101","49","50"}
 local Slots = {"57"}
 local FurnituresCooldowns = {}
@@ -189,7 +182,6 @@ Bakery.AddCustomersToQueueIfNecessary = function(bakery, kickCustomerIfNecessary
         local floor = bakery.floors[seat.floorLevel]
         local overrideUID = nil
 
-        -- ROYAL TABLE
         if not hasAlreadyBeenForced and Settings.ForceVIP then
             if (seat.ID == "43" or seat.ID == "44") then
                 hasAlreadyBeenForced = true
@@ -199,7 +191,6 @@ Bakery.AddCustomersToQueueIfNecessary = function(bakery, kickCustomerIfNecessary
             end
         end
 
-        -- ROYAL HALLOWEEN
         if not hasAlreadyBeenForced and Settings.ForceHeadless then
             if (seat.ID == "98" or seat.ID == "99") then
                 hasAlreadyBeenForced = true
@@ -209,7 +200,6 @@ Bakery.AddCustomersToQueueIfNecessary = function(bakery, kickCustomerIfNecessary
             end
         end
 
-        -- LIFEGUARD
         if not hasAlreadyBeenForced and Settings.ForceLifeguard then
             if (seat.ID == "118" or seat.ID == "119") then
                 hasAlreadyBeenForced = true
@@ -219,7 +209,6 @@ Bakery.AddCustomersToQueueIfNecessary = function(bakery, kickCustomerIfNecessary
             end
         end
 
-        -- ALIEN
         if not hasAlreadyBeenForced and Settings.ForceAlien then
             if (seat.ID == "120" or seat.ID == "121") then
                 hasAlreadyBeenForced = true
@@ -229,7 +218,6 @@ Bakery.AddCustomersToQueueIfNecessary = function(bakery, kickCustomerIfNecessary
             end
         end
 
-        -- PRINCESS
         if not hasAlreadyBeenForced and Settings.ForcePrincess then
             if (seat.ID == "124" or seat.ID == "125") then
                 hasAlreadyBeenForced = true
@@ -239,7 +227,6 @@ Bakery.AddCustomersToQueueIfNecessary = function(bakery, kickCustomerIfNecessary
             end
         end
 
-        -- SUPERHERO
         if not hasAlreadyBeenForced and Settings.ForceSuperHero then
             if (seat.ID == "127" or seat.ID == "128") then
                 hasAlreadyBeenForced = true
@@ -249,7 +236,6 @@ Bakery.AddCustomersToQueueIfNecessary = function(bakery, kickCustomerIfNecessary
             end
         end
 
-        -- PIRATE
         if not hasAlreadyBeenForced and Settings.ForcePirate then
             if (seat.ID == "74" or seat.ID == "75") then
                 hasAlreadyBeenForced = true
@@ -259,7 +245,6 @@ Bakery.AddCustomersToQueueIfNecessary = function(bakery, kickCustomerIfNecessary
             end
         end
 
-        -- YOUTUBER
         if not hasAlreadyBeenForced and Settings.ForceYoutuber then
             if (seat.ID == "84" or seat.ID == "85") then
                 hasAlreadyBeenForced = true
@@ -269,7 +254,6 @@ Bakery.AddCustomersToQueueIfNecessary = function(bakery, kickCustomerIfNecessary
             end
         end
 
-        -- SANTA
         if not hasAlreadyBeenForced and Settings.ForceSanta then
             if seat.ID == "108" then
                 hasAlreadyBeenForced = true
@@ -279,7 +263,6 @@ Bakery.AddCustomersToQueueIfNecessary = function(bakery, kickCustomerIfNecessary
             end
         end
 
-        -- ELF
         if not hasAlreadyBeenForced and Settings.ForceElf then 
             if (seat.ID == "110" or seat.ID == "111") then
                 hasAlreadyBeenForced = true
@@ -391,238 +374,604 @@ function TeleportThroughWaypoints(entity, voxelpoints, waypoints)
 end
 
 -------------------------//
---// TẠO GIAO DIỆN ORION
+--// TẠO GUI THỦ CÔNG - KÉO ĐƯỢC
 -------------------------//
 
--- Tab Farm
-local FarmTab = Window:MakeTab({
-    Name = "Farm",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+-- Tạo ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MyRestaurantGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game:GetService("CoreGui")
 
-FarmTab:AddLabel("Instant Options")
+-- Tạo Frame chính
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 380, 0, 500)
+MainFrame.Position = UDim2.new(0.5, -190, 0.5, -250)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Parent = ScreenGui
 
-FarmTab:AddToggle({
-    Name = "Instant Order",
-    Default = false,
-    Callback = function(v) Settings.FastOrder = v end
-})
+-- Bo góc
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainFrame
 
-FarmTab:AddToggle({
-    Name = "Instant Waiter",
-    Default = false,
-    Callback = function(v) Settings.FastWaiter = v end
-})
+-- Drop shadow (bóng đổ)
+local Shadow = Instance.new("ImageLabel")
+Shadow.Name = "Shadow"
+Shadow.Size = UDim2.new(1, 30, 1, 30)
+Shadow.Position = UDim2.new(0, -15, 0, -15)
+Shadow.BackgroundTransparency = 1
+Shadow.Image = "rbxassetid://6014261993"
+Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+Shadow.ImageTransparency = 0.5
+Shadow.ScaleType = Enum.ScaleType.Slice
+Shadow.SliceCenter = Rect.new(15, 15, 15, 15)
+Shadow.Parent = MainFrame
 
-FarmTab:AddToggle({
-    Name = "Instant Cook",
-    Default = false,
-    Callback = function(v) Settings.InstantCook = v end
-})
+-- Title bar - CÓ THỂ KÉO
+local TitleBar = Instance.new("Frame")
+TitleBar.Name = "TitleBar"
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
 
-FarmTab:AddToggle({
-    Name = "Instant Eat",
-    Default = false,
-    Callback = function(v) Settings.InstantEat = v end
-})
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 10)
+TitleCorner.Parent = TitleBar
 
-FarmTab:AddToggle({
-    Name = "Instant Wash",
-    Default = false,
-    Callback = function(v) Settings.InstantWash = v end
-})
+-- Title text
+local TitleText = Instance.new("TextLabel")
+TitleText.Size = UDim2.new(1, -80, 1, 0)
+TitleText.Position = UDim2.new(0, 15, 0, 0)
+TitleText.BackgroundTransparency = 1
+TitleText.Text = "My Restaurant! Ultimate"
+TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
+TitleText.Font = Enum.Font.GothamBold
+TitleText.TextSize = 18
+TitleText.Parent = TitleBar
 
-FarmTab:AddLabel("Farm Options")
+-- Close button
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0, 5)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 20
+CloseBtn.Parent = TitleBar
 
-FarmTab:AddToggle({
-    Name = "Gold Food",
-    Default = false,
-    Callback = function(v) Settings.GoldFood = v end
-})
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.Parent = CloseBtn
 
-FarmTab:AddToggle({
-    Name = "Optimize Game",
-    Default = false,
-    Callback = function(v) Settings.OptimizedMode = v end
-})
+-- Minimize button
+local MinBtn = Instance.new("TextButton")
+MinBtn.Size = UDim2.new(0, 30, 0, 30)
+MinBtn.Position = UDim2.new(1, -70, 0, 5)
+MinBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+MinBtn.Text = "-"
+MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.TextSize = 20
+MinBtn.Parent = TitleBar
 
-FarmTab:AddParagraph("Force Best Customer", "Ép khách VIP đặc biệt xuất hiện")
+local MinCorner = Instance.new("UICorner")
+MinCorner.CornerRadius = UDim.new(0, 6)
+MinCorner.Parent = MinBtn
 
-FarmTab:AddToggle({
-    Name = "Force Best Customer",
-    Default = false,
-    Callback = function(v) Settings.ForceCustomers = v end
-})
+-- Tabs container
+local TabContainer = Instance.new("Frame")
+TabContainer.Name = "TabContainer"
+TabContainer.Size = UDim2.new(1, 0, 0, 40)
+TabContainer.Position = UDim2.new(0, 0, 0, 40)
+TabContainer.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+TabContainer.BorderSizePixel = 0
+TabContainer.Parent = MainFrame
 
-FarmTab:AddToggle({
-    Name = "Force Royal VIP",
-    Default = false,
-    Callback = function(v) Settings.ForceVIP = v end
-})
+-- Main content area (sẽ thay đổi theo tab)
+local ContentArea = Instance.new("ScrollingFrame")
+ContentArea.Name = "ContentArea"
+ContentArea.Size = UDim2.new(1, -20, 1, -100)
+ContentArea.Position = UDim2.new(0, 10, 0, 85)
+ContentArea.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+ContentArea.BorderSizePixel = 0
+ContentArea.CanvasSize = UDim2.new(0, 0, 0, 0)
+ContentArea.ScrollBarThickness = 8
+ContentArea.AutomaticCanvasSize = Enum.AutomaticSize.Y
+ContentArea.Parent = MainFrame
 
-FarmTab:AddToggle({
-    Name = "Force Pirate",
-    Default = false,
-    Callback = function(v) Settings.ForcePirate = v end
-})
+local ContentCorner = Instance.new("UICorner")
+ContentCorner.CornerRadius = UDim.new(0, 8)
+ContentCorner.Parent = ContentArea
 
-FarmTab:AddToggle({
-    Name = "Force Youtuber",
-    Default = false,
-    Callback = function(v) Settings.ForceYoutuber = v end
-})
+-- Hàm kéo thả
+local dragToggle, dragInput, dragStart, dragPos
 
-FarmTab:AddToggle({
-    Name = "Force Headless",
-    Default = false,
-    Callback = function(v) Settings.ForceHeadless = v end
-})
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragToggle = true
+        dragStart = input.Position
+        dragPos = MainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragToggle = false
+            end
+        end)
+    end
+end)
 
-FarmTab:AddToggle({
-    Name = "Force Corrupted VIP",
-    Default = false,
-    Callback = function(v) Settings.ForceCorruptedVIP = v end
-})
+TitleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
 
-FarmTab:AddToggle({
-    Name = "Force Santa",
-    Default = false,
-    Callback = function(v) Settings.ForceSanta = v end
-})
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragToggle then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(dragPos.X.Scale, dragPos.X.Offset + delta.X, dragPos.Y.Scale, dragPos.Y.Offset + delta.Y)
+    end
+end)
 
-FarmTab:AddToggle({
-    Name = "Force Elf",
-    Default = false,
-    Callback = function(v) Settings.ForceElf = v end
-})
+-- Close button function
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
 
-FarmTab:AddToggle({
-    Name = "Force Lifeguard",
-    Default = false,
-    Callback = function(v) Settings.ForceLifeguard = v end
-})
+-- Minimize function
+local minimized = false
+local originalSize = MainFrame.Size
 
-FarmTab:AddToggle({
-    Name = "Force Alien",
-    Default = false,
-    Callback = function(v) Settings.ForceAlien = v end
-})
+MinBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        MainFrame.Size = UDim2.new(0, 380, 0, 40)
+        ContentArea.Visible = false
+        TabContainer.Visible = false
+        MinBtn.Text = "+"
+    else
+        MainFrame.Size = originalSize
+        ContentArea.Visible = true
+        TabContainer.Visible = true
+        MinBtn.Text = "-"
+    end
+end)
 
-FarmTab:AddToggle({
-    Name = "Force Princess",
-    Default = false,
-    Callback = function(v) Settings.ForcePrincess = v end
-})
-
-FarmTab:AddToggle({
-    Name = "Force Superhero",
-    Default = false,
-    Callback = function(v) Settings.ForceSuperHero = v end
-})
-
-FarmTab:AddLabel("NPCs Options")
-
-FarmTab:AddToggle({
-    Name = "NPC Teleport",
-    Default = false,
-    Callback = function(v) Settings.TeleportNPC = v end
-})
-
-FarmTab:AddToggle({
-    Name = "Change NPC Walkspeed",
-    Default = false,
-    Callback = function(v) Settings.FastNPC = v end
-})
-
-FarmTab:AddSlider({
-    Name = "NPC Walkspeed",
-    Min = 16,
-    Max = 300,
-    Default = 100,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 1,
-    ValueName = "speed",
-    Callback = function(v) Settings.NPCSpeed = v end
-})
-
--- Tab Teleport
-local TeleportTab = Window:MakeTab({
-    Name = "Teleport",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
-function AddTeleport(name, pos)
-    TeleportTab:AddButton({
-        Name = name,
-        Callback = function()
-            local char = Player.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.CFrame = pos
+-- Hàm tạo tab
+local currentTab = nil
+local function CreateTab(name, iconId)
+    local TabBtn = Instance.new("TextButton")
+    TabBtn.Name = name.."Tab"
+    TabBtn.Size = UDim2.new(0, 80, 0, 35)
+    TabBtn.Position = UDim2.new(0, 10 + (#TabContainer:GetChildren() - 1) * 90, 0, 2.5)
+    TabBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    TabBtn.Text = name
+    TabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    TabBtn.Font = Enum.Font.Gotham
+    TabBtn.TextSize = 14
+    TabBtn.Parent = TabContainer
+    
+    local TabCorner = Instance.new("UICorner")
+    TabCorner.CornerRadius = UDim.new(0, 6)
+    TabCorner.Parent = TabBtn
+    
+    TabBtn.MouseButton1Click:Connect(function()
+        -- Reset all tabs
+        for _, child in ipairs(TabContainer:GetChildren()) do
+            if child:IsA("TextButton") then
+                child.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+                child.TextColor3 = Color3.fromRGB(200, 200, 200)
             end
         end
-    })
+        
+        -- Highlight current tab
+        TabBtn.BackgroundColor3 = Color3.fromRGB(60, 100, 200)
+        TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        
+        -- Clear content
+        for _, child in ipairs(ContentArea:GetChildren()) do
+            if child:IsA("Frame") then
+                child:Destroy()
+            end
+        end
+        
+        currentTab = name
+        
+        -- Load content based on tab
+        if name == "Farm" then
+            LoadFarmTab()
+        elseif name == "Teleport" then
+            LoadTeleportTab()
+        elseif name == "Auto" then
+            LoadAutoTab()
+        end
+    end)
+    
+    return TabBtn
 end
 
-TeleportTab:AddLabel("Store")
-AddTeleport("Daily Offers", CFrame.new(-97.3, 1611, 536.9))
-AddTeleport("Restaurant Themes", CFrame.new(-157.2, 1611, 631.7))
-AddTeleport("Twitter Verify", CFrame.new(-375.1, 1611, 500.1))
+-- Hàm tạo toggle
+local function CreateToggle(parent, text, default, callback)
+    local yPos = #parent:GetChildren() * 35
+    
+    local ToggleFrame = Instance.new("Frame")
+    ToggleFrame.Size = UDim2.new(1, -10, 0, 30)
+    ToggleFrame.Position = UDim2.new(0, 5, 0, yPos)
+    ToggleFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    ToggleFrame.BorderSizePixel = 0
+    ToggleFrame.Parent = parent
+    
+    local ToggleCorner = Instance.new("UICorner")
+    ToggleCorner.CornerRadius = UDim.new(0, 6)
+    ToggleCorner.Parent = ToggleFrame
+    
+    local ToggleBtn = Instance.new("TextButton")
+    ToggleBtn.Size = UDim2.new(0, 30, 0, 30)
+    ToggleBtn.Position = UDim2.new(1, -35, 0, 0)
+    ToggleBtn.BackgroundColor3 = default and Color3.fromRGB(60, 200, 100) or Color3.fromRGB(50, 50, 60)
+    ToggleBtn.Text = default and "✓" or ""
+    ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleBtn.Font = Enum.Font.GothamBold
+    ToggleBtn.TextSize = 18
+    ToggleBtn.Parent = ToggleFrame
+    
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.Parent = ToggleBtn
+    
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -40, 1, 0)
+    Label.Position = UDim2.new(0, 10, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Font = Enum.Font.Gotham
+    Label.TextSize = 14
+    Label.Parent = ToggleFrame
+    
+    local state = default
+    
+    ToggleBtn.MouseButton1Click:Connect(function()
+        state = not state
+        ToggleBtn.BackgroundColor3 = state and Color3.fromRGB(60, 200, 100) or Color3.fromRGB(50, 50, 60)
+        ToggleBtn.Text = state and "✓" or ""
+        if callback then callback(state) end
+    end)
+    
+    return ToggleFrame
+end
 
--- Tab Automation
-local AutoTab = Window:MakeTab({
-    Name = "Automation",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+-- Hàm tạo button
+local function CreateButton(parent, text, callback)
+    local yPos = #parent:GetChildren() * 35
+    
+    local BtnFrame = Instance.new("Frame")
+    BtnFrame.Size = UDim2.new(1, -10, 0, 30)
+    BtnFrame.Position = UDim2.new(0, 5, 0, yPos)
+    BtnFrame.BackgroundTransparency = 1
+    BtnFrame.Parent = parent
+    
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, 0, 0, 30)
+    Button.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    Button.Text = text
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.Font = Enum.Font.Gotham
+    Button.TextSize = 14
+    Button.Parent = BtnFrame
+    
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.Parent = Button
+    
+    Button.MouseButton1Click:Connect(function()
+        if callback then callback() end
+    end)
+    
+    return BtnFrame
+end
 
-AutoTab:AddLabel("Farm")
+-- Hàm tạo slider
+local function CreateSlider(parent, text, min, max, default, suffix, callback)
+    local yPos = #parent:GetChildren() * 45
+    
+    local SliderFrame = Instance.new("Frame")
+    SliderFrame.Size = UDim2.new(1, -10, 0, 40)
+    SliderFrame.Position = UDim2.new(0, 5, 0, yPos)
+    SliderFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    SliderFrame.BorderSizePixel = 0
+    SliderFrame.Parent = parent
+    
+    local SliderCorner = Instance.new("UICorner")
+    SliderCorner.CornerRadius = UDim.new(0, 6)
+    SliderCorner.Parent = SliderFrame
+    
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -20, 0, 20)
+    Label.Position = UDim2.new(0, 10, 0, 5)
+    Label.BackgroundTransparency = 1
+    Label.Text = text .. ": " .. default .. " " .. suffix
+    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Font = Enum.Font.Gotham
+    Label.TextSize = 14
+    Label.Parent = SliderFrame
+    
+    local SliderBg = Instance.new("Frame")
+    SliderBg.Size = UDim2.new(1, -20, 0, 5)
+    SliderBg.Position = UDim2.new(0, 10, 0, 25)
+    SliderBg.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    SliderBg.BorderSizePixel = 0
+    SliderBg.Parent = SliderFrame
+    
+    local SliderBar = Instance.new("Frame")
+    SliderBar.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+    SliderBar.BackgroundColor3 = Color3.fromRGB(60, 100, 200)
+    SliderBar.BorderSizePixel = 0
+    SliderBar.Parent = SliderBg
+    
+    local SliderButton = Instance.new("TextButton")
+    SliderButton.Size = UDim2.new(0, 15, 0, 15)
+    SliderButton.Position = UDim2.new((default - min) / (max - min), -7.5, 0, -5)
+    SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    SliderButton.Text = ""
+    SliderButton.Parent = SliderBg
+    
+    local ButtonCorner = Instance.new("UICorner")
+    ButtonCorner.CornerRadius = UDim.new(0, 8)
+    ButtonCorner.Parent = SliderButton
+    
+    local dragging = false
+    local value = default
+    
+    SliderButton.MouseButton1Down:Connect(function()
+        dragging = true
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local mousePos = UserInputService:GetMouseLocation()
+            local absPos = SliderBg.AbsolutePosition
+            local absSize = SliderBg.AbsoluteSize.X
+            
+            local newX = math.clamp(mousePos.X - absPos.X, 0, absSize)
+            local newPercent = newX / absSize
+            value = math.floor(min + (max - min) * newPercent)
+            
+            SliderBar.Size = UDim2.new(newPercent, 0, 1, 0)
+            SliderButton.Position = UDim2.new(newPercent, -7.5, 0, -5)
+            Label.Text = text .. ": " .. value .. " " .. suffix
+            
+            if callback then callback(value) end
+        end
+    end)
+end
 
-AutoTab:AddToggle({
-    Name = "Auto Collect Santa Gifts",
-    Default = false,
-    Callback = function(v) Settings.AutoGift = v end
-})
+-- Hàm tạo label
+local function CreateLabel(parent, text)
+    local yPos = #parent:GetChildren() * 25
+    
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -20, 0, 20)
+    Label.Position = UDim2.new(0, 10, 0, yPos)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Color3.fromRGB(180, 180, 180)
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Font = Enum.Font.Gotham
+    Label.TextSize = 12
+    Label.Parent = parent
+    
+    return Label
+end
 
-AutoTab:AddToggle({
-    Name = "Auto Slot Machine / Wishing Well",
-    Default = false,
-    Callback = function(v) Settings.AutoInteract = v end
-})
+-- Load Farm Tab
+function LoadFarmTab()
+    local FarmContent = Instance.new("Frame")
+    FarmContent.Size = UDim2.new(1, 0, 0, 0)
+    FarmContent.BackgroundTransparency = 1
+    FarmContent.AutomaticSize = Enum.AutomaticSize.Y
+    FarmContent.Parent = ContentArea
+    
+    CreateLabel(FarmContent, "Instant Options")
+    
+    CreateToggle(FarmContent, "Instant Order", Settings.FastOrder, function(v)
+        Settings.FastOrder = v
+    end)
+    
+    CreateToggle(FarmContent, "Instant Waiter", Settings.FastWaiter, function(v)
+        Settings.FastWaiter = v
+    end)
+    
+    CreateToggle(FarmContent, "Instant Cook", Settings.InstantCook, function(v)
+        Settings.InstantCook = v
+    end)
+    
+    CreateToggle(FarmContent, "Instant Eat", Settings.InstantEat, function(v)
+        Settings.InstantEat = v
+    end)
+    
+    CreateToggle(FarmContent, "Instant Wash", Settings.InstantWash, function(v)
+        Settings.InstantWash = v
+    end)
+    
+    CreateLabel(FarmContent, "Farm Options")
+    
+    CreateToggle(FarmContent, "Gold Food", Settings.GoldFood, function(v)
+        Settings.GoldFood = v
+    end)
+    
+    CreateToggle(FarmContent, "Optimize Game", Settings.OptimizedMode, function(v)
+        Settings.OptimizedMode = v
+    end)
+    
+    CreateLabel(FarmContent, "Force Customers")
+    
+    CreateToggle(FarmContent, "Force Best Customer", Settings.ForceCustomers, function(v)
+        Settings.ForceCustomers = v
+    end)
+    
+    CreateToggle(FarmContent, "Force VIP", Settings.ForceVIP, function(v)
+        Settings.ForceVIP = v
+    end)
+    
+    CreateToggle(FarmContent, "Force Pirate", Settings.ForcePirate, function(v)
+        Settings.ForcePirate = v
+    end)
+    
+    CreateToggle(FarmContent, "Force Youtuber", Settings.ForceYoutuber, function(v)
+        Settings.ForceYoutuber = v
+    end)
+    
+    CreateToggle(FarmContent, "Force Headless", Settings.ForceHeadless, function(v)
+        Settings.ForceHeadless = v
+    end)
+    
+    CreateToggle(FarmContent, "Force Lifeguard", Settings.ForceLifeguard, function(v)
+        Settings.ForceLifeguard = v
+    end)
+    
+    CreateToggle(FarmContent, "Force Alien", Settings.ForceAlien, function(v)
+        Settings.ForceAlien = v
+    end)
+    
+    CreateToggle(FarmContent, "Force Santa", Settings.ForceSanta, function(v)
+        Settings.ForceSanta = v
+    end)
+    
+    CreateToggle(FarmContent, "Force Elf", Settings.ForceElf, function(v)
+        Settings.ForceElf = v
+    end)
+    
+    CreateLabel(FarmContent, "NPC Options")
+    
+    CreateToggle(FarmContent, "NPC Teleport", Settings.TeleportNPC, function(v)
+        Settings.TeleportNPC = v
+    end)
+    
+    CreateToggle(FarmContent, "Change NPC Speed", Settings.FastNPC, function(v)
+        Settings.FastNPC = v
+    end)
+    
+    CreateSlider(FarmContent, "NPC Speed", 16, 300, Settings.NPCSpeed, "spd", function(v)
+        Settings.NPCSpeed = v
+    end)
+end
 
-AutoTab:AddToggle({
-    Name = "Auto Buy Workers",
-    Default = false,
-    Callback = function(v) Settings.AutoBuyWorkers = v end
-})
+-- Load Teleport Tab
+function LoadTeleportTab()
+    local TeleportContent = Instance.new("Frame")
+    TeleportContent.Size = UDim2.new(1, 0, 0, 0)
+    TeleportContent.BackgroundTransparency = 1
+    TeleportContent.AutomaticSize = Enum.AutomaticSize.Y
+    TeleportContent.Parent = ContentArea
+    
+    CreateLabel(TeleportContent, "Store Teleports")
+    
+    CreateButton(TeleportContent, "Daily Offers", function()
+        local char = Player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = CFrame.new(-97.3, 1611, 536.9)
+        end
+    end)
+    
+    CreateButton(TeleportContent, "Restaurant Themes", function()
+        local char = Player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = CFrame.new(-157.2, 1611, 631.7)
+        end
+    end)
+    
+    CreateButton(TeleportContent, "Twitter Verify", function()
+        local char = Player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            char.HumanoidRootPart.CFrame = CFrame.new(-375.1, 1611, 500.1)
+        end
+    end)
+end
 
-AutoTab:AddLabel("Blacklist")
+-- Load Automation Tab
+function LoadAutoTab()
+    local AutoContent = Instance.new("Frame")
+    AutoContent.Size = UDim2.new(1, 0, 0, 0)
+    AutoContent.BackgroundTransparency = 1
+    AutoContent.AutomaticSize = Enum.AutomaticSize.Y
+    AutoContent.Parent = ContentArea
+    
+    CreateLabel(AutoContent, "Automation")
+    
+    CreateToggle(AutoContent, "Auto Collect Gifts", Settings.AutoGift, function(v)
+        Settings.AutoGift = v
+    end)
+    
+    CreateToggle(AutoContent, "Auto Interact", Settings.AutoInteract, function(v)
+        Settings.AutoInteract = v
+    end)
+    
+    CreateToggle(AutoContent, "Auto Buy Workers", Settings.AutoBuyWorkers, function(v)
+        Settings.AutoBuyWorkers = v
+    end)
+    
+    CreateToggle(AutoContent, "Auto Blacklist", Settings.AutoBlacklist, function(v)
+        Settings.AutoBlacklist = v
+    end)
+    
+    CreateLabel(AutoContent, "Auto Close Restaurant")
+    
+    CreateToggle(AutoContent, "Enable Auto Close", Settings.AutoCloseRestaurant, function(v)
+        Settings.AutoCloseRestaurant = v
+        if v then
+            Settings.LastTimeClose = os.time()
+        end
+    end)
+    
+    CreateSlider(AutoContent, "Close Every", 20, 3600, Settings.AutoCloseEvery, "s", function(v)
+        Settings.AutoCloseEvery = v
+    end)
+end
 
-AutoTab:AddToggle({
-    Name = "Auto Blacklist",
-    Default = false,
-    Callback = function(v) Settings.AutoBlacklist = v end
-})
+-- Tạo các tab
+CreateTab("Farm", "")
+CreateTab("Teleport", "")
+CreateTab("Auto", "")
 
-AutoTab:AddLabel("Auto Close Restaurant")
+-- Auto close restaurant loop
+coroutine.wrap(function()
+    while true do
+        if Settings.AutoCloseRestaurant and Settings.LastTimeClose == 0 then
+            Settings.LastTimeClose = os.time()
+        end
+    
+        if Settings.AutoCloseRestaurant and os.time() > Settings.LastTimeClose + Settings.AutoCloseEvery then 
+            pcall(function() 
+                Library.Variables.MyBakery:SetOpenStatus(false)
+            end)
+            
+            wait(5)
 
-AutoTab:AddToggle({
-    Name = "Auto Close Restaurant",
-    Default = false,
-    Callback = function(v) Settings.AutoCloseRestaurant = v end
-})
-
-AutoTab:AddSlider({
-    Name = "Close Every (seconds)",
-    Min = 20,
-    Max = 3600,
-    Default = 600,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 10,
-    ValueName = "s",
-    Callback = function(v) Settings.AutoCloseEvery = v end
-})
+            pcall(function()         
+                Library.Variables.MyBakery:SetOpenStatus(true)
+            end)
+    
+            Settings.LastTimeClose = os.time()
+        end
+    
+        wait(1)
+    end
+end)()
 
 -- Anti-AFK
 task.spawn(function()
@@ -633,4 +982,7 @@ task.spawn(function()
     end
 end)
 
-Orion:Init() 
+-- Load Farm tab mặc định
+LoadFarmTab()
+
+print("✅ My Restaurant! Script loaded successfully!")
