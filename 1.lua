@@ -4,26 +4,17 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 
--- Tải Rayfield
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
-assert(Rayfield, "Không thể tải Rayfield!")
+-- Tải Orion
+local Orion = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+assert(Orion, "Không thể tải Orion!")
 
 -- Tạo Window
-local Window = Rayfield:CreateWindow({
+local Window = Orion:MakeWindow({
     Name = "My Restaurant! | Ultimate Script",
-    LoadingTitle = "My Restaurant!",
-    LoadingSubtitle = "by ZmZ",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "MyRestaurant",
-        FileName = "Config"
-    },
-    Discord = {
-        Enabled = false,
-        Invite = "",
-        RememberJoins = true
-    },
-    KeySystem = false
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "MyRestaurant",
+    IntroEnabled = false
 })
 
 -- Lấy Library game
@@ -351,19 +342,6 @@ Waiter.PerformAction = function(waiter)
     end
 end
 
-local Original_CheckForDishPickup = Waiter.CheckForDishPickup
-Waiter.CheckForDishPickup = function(waiter)
-    if not Settings.FastWaiter then return Original_CheckForDishPickup(waiter) end
-    -- Giữ nguyên logic nhưng đã tối ưu
-    return Original_CheckForDishPickup(waiter)
-end
-
-local Original_CheckForCustomerOrder = Waiter.CheckForCustomerOrder
-Waiter.CheckForCustomerOrder = function(waiter)
-    if not Settings.FastWaiter then return Original_CheckForCustomerOrder(waiter) end
-    return Original_CheckForCustomerOrder(waiter)
-end
-
 local Original_RandomFoodChoice = Food.RandomFoodChoice
 Food.RandomFoodChoice = function(customerOwnerUID, customerOwnerID, isRichCustomer, isPirateCustomer, isNearTree)
     if Settings.GoldFood then
@@ -384,22 +362,6 @@ Customer.DropPresent = function(gift)
     else 
         Original_DropPresent(gift)
     end
-end
-
-local Original_CheckForFoodDelivery = Waiter.CheckForFoodDelivery
-Waiter.CheckForFoodDelivery = function(waiter)
-    if not Settings.GoldFood then return Original_CheckForFoodDelivery(waiter) end
-    return Original_CheckForFoodDelivery(waiter)
-end
-
-local Original_ChangeToWaitForOrderState = Customer.ChangeToWaitForOrderState
-Customer.ChangeToWaitForOrderState = function(customer)
-    if not Settings.FastOrder then 
-        Original_ChangeToWaitForOrderState(customer) 
-        return
-    end
-    if customer.state ~= "WalkingToSeat" then return end
-    Original_ChangeToWaitForOrderState(customer)
 end
 
 local Original_WalkThroughWaypoints = Entity.WalkThroughWaypoints
@@ -429,168 +391,170 @@ function TeleportThroughWaypoints(entity, voxelpoints, waypoints)
 end
 
 -------------------------//
---// TẠO GIAO DIỆN RAYFIELD
+--// TẠO GIAO DIỆN ORION
 -------------------------//
 
 -- Tab Farm
-local FarmTab = Window:CreateTab("Farm", 4483345998)
+local FarmTab = Window:MakeTab({
+    Name = "Farm",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
-FarmTab:CreateSection("Instant Options")
+FarmTab:AddLabel("Instant Options")
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Instant Order",
-    Info = "Khách order ngay lập tức",
     Default = false,
     Callback = function(v) Settings.FastOrder = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Instant Waiter",
-    Info = "Nhân viên phục vụ nhanh",
     Default = false,
     Callback = function(v) Settings.FastWaiter = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Instant Cook",
-    Info = "Nấu ăn tức thì",
     Default = false,
     Callback = function(v) Settings.InstantCook = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Instant Eat",
-    Info = "Khách ăn xong ngay",
     Default = false,
     Callback = function(v) Settings.InstantEat = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Instant Wash",
-    Info = "Rửa bát tức thì",
     Default = false,
     Callback = function(v) Settings.InstantWash = v end
 })
 
-FarmTab:CreateSection("Farm Options")
+FarmTab:AddLabel("Farm Options")
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Gold Food",
-    Info = "Luôn có thức ăn vàng",
     Default = false,
     Callback = function(v) Settings.GoldFood = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Optimize Game",
-    Info = "Tối ưu đồ họa giảm lag",
     Default = false,
     Callback = function(v) Settings.OptimizedMode = v end
 })
 
-FarmTab:CreateParagraph("Force Best Customer", "Ép khách VIP đặc biệt xuất hiện:\n- Beach table → Lifeguard\n- UFO table → Alien\n- Royal → VIP\nv.v...")
+FarmTab:AddParagraph("Force Best Customer", "Ép khách VIP đặc biệt xuất hiện")
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Force Best Customer",
     Default = false,
     Callback = function(v) Settings.ForceCustomers = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Force Royal VIP",
     Default = false,
     Callback = function(v) Settings.ForceVIP = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Force Pirate",
     Default = false,
     Callback = function(v) Settings.ForcePirate = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Force Youtuber",
     Default = false,
     Callback = function(v) Settings.ForceYoutuber = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Force Headless",
     Default = false,
     Callback = function(v) Settings.ForceHeadless = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Force Corrupted VIP",
     Default = false,
     Callback = function(v) Settings.ForceCorruptedVIP = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Force Santa",
     Default = false,
     Callback = function(v) Settings.ForceSanta = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Force Elf",
     Default = false,
     Callback = function(v) Settings.ForceElf = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Force Lifeguard",
     Default = false,
     Callback = function(v) Settings.ForceLifeguard = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Force Alien",
     Default = false,
     Callback = function(v) Settings.ForceAlien = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Force Princess",
     Default = false,
     Callback = function(v) Settings.ForcePrincess = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Force Superhero",
     Default = false,
     Callback = function(v) Settings.ForceSuperHero = v end
 })
 
-FarmTab:CreateSection("NPCs Options")
+FarmTab:AddLabel("NPCs Options")
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "NPC Teleport",
-    Info = "NPC dịch chuyển tức thời",
     Default = false,
     Callback = function(v) Settings.TeleportNPC = v end
 })
 
-FarmTab:CreateToggle({
+FarmTab:AddToggle({
     Name = "Change NPC Walkspeed",
     Default = false,
     Callback = function(v) Settings.FastNPC = v end
 })
 
-FarmTab:CreateSlider({
+FarmTab:AddSlider({
     Name = "NPC Walkspeed",
-    Range = {16, 300},
+    Min = 16,
+    Max = 300,
     Default = 100,
+    Color = Color3.fromRGB(255,255,255),
     Increment = 1,
-    Suffix = "Speed",
+    ValueName = "speed",
     Callback = function(v) Settings.NPCSpeed = v end
 })
 
 -- Tab Teleport
-local TeleportTab = Window:CreateTab("Teleport", 4483345998)
+local TeleportTab = Window:MakeTab({
+    Name = "Teleport",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
-function CreateTeleport(name, pos)
-    TeleportTab:CreateButton({
+function AddTeleport(name, pos)
+    TeleportTab:AddButton({
         Name = name,
         Callback = function()
             local char = Player.Character
@@ -601,57 +565,62 @@ function CreateTeleport(name, pos)
     })
 end
 
-TeleportTab:CreateSection("Store")
-CreateTeleport("Daily Offers", CFrame.new(-97.3, 1611, 536.9))
-CreateTeleport("Restaurant Themes", CFrame.new(-157.2, 1611, 631.7))
-CreateTeleport("Twitter Verify", CFrame.new(-375.1, 1611, 500.1))
+TeleportTab:AddLabel("Store")
+AddTeleport("Daily Offers", CFrame.new(-97.3, 1611, 536.9))
+AddTeleport("Restaurant Themes", CFrame.new(-157.2, 1611, 631.7))
+AddTeleport("Twitter Verify", CFrame.new(-375.1, 1611, 500.1))
 
 -- Tab Automation
-local AutoTab = Window:CreateTab("Automation", 4483345998)
+local AutoTab = Window:MakeTab({
+    Name = "Automation",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
-AutoTab:CreateSection("Farm")
+AutoTab:AddLabel("Farm")
 
-AutoTab:CreateToggle({
+AutoTab:AddToggle({
     Name = "Auto Collect Santa Gifts",
     Default = false,
     Callback = function(v) Settings.AutoGift = v end
 })
 
-AutoTab:CreateToggle({
+AutoTab:AddToggle({
     Name = "Auto Slot Machine / Wishing Well",
     Default = false,
     Callback = function(v) Settings.AutoInteract = v end
 })
 
-AutoTab:CreateToggle({
+AutoTab:AddToggle({
     Name = "Auto Buy Workers",
     Default = false,
     Callback = function(v) Settings.AutoBuyWorkers = v end
 })
 
-AutoTab:CreateSection("Blacklist")
+AutoTab:AddLabel("Blacklist")
 
-AutoTab:CreateToggle({
+AutoTab:AddToggle({
     Name = "Auto Blacklist",
-    Info = "Tự động chặn người lạ",
     Default = false,
     Callback = function(v) Settings.AutoBlacklist = v end
 })
 
-AutoTab:CreateSection("Auto Close Restaurant")
+AutoTab:AddLabel("Auto Close Restaurant")
 
-AutoTab:CreateToggle({
+AutoTab:AddToggle({
     Name = "Auto Close Restaurant",
     Default = false,
     Callback = function(v) Settings.AutoCloseRestaurant = v end
 })
 
-AutoTab:CreateSlider({
+AutoTab:AddSlider({
     Name = "Close Every (seconds)",
-    Range = {20, 3600},
+    Min = 20,
+    Max = 3600,
     Default = 600,
+    Color = Color3.fromRGB(255,255,255),
     Increment = 10,
-    Suffix = "s",
+    ValueName = "s",
     Callback = function(v) Settings.AutoCloseEvery = v end
 })
 
@@ -664,4 +633,4 @@ task.spawn(function()
     end
 end)
 
-Rayfield:LoadConfiguration() 
+Orion:Init() 
